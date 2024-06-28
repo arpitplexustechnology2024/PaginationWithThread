@@ -17,7 +17,7 @@ class QuotesViewController: UIViewController {
     private let disposeBag = DisposeBag()
     private let noInternetView = NoInternetView()
     var noDataView: NoDataView!
-
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         setupUI()
@@ -41,7 +41,7 @@ class QuotesViewController: UIViewController {
         
         noDataView.isHidden = true
     }
-
+    
     private func setupUI() {
         setupTableViewFooter()
         
@@ -57,7 +57,7 @@ class QuotesViewController: UIViewController {
         
         noInternetView.isHidden = true
         noInternetView.retryButton.addTarget(self, action: #selector(retryFetchingQuotes), for: .touchUpInside)
-
+        
         tableView.rx
             .willDisplayCell
             .subscribe(onNext: { [weak self] (_, indexPath) in
@@ -69,7 +69,7 @@ class QuotesViewController: UIViewController {
             })
             .disposed(by: disposeBag)
     }
-
+    
     private func setupTableViewFooter() {
         let footerView = UIView(frame: CGRect(x: 0, y: 0, width: tableView.frame.width, height: 50))
         footerActivityIndicator.translatesAutoresizingMaskIntoConstraints = false
@@ -82,7 +82,7 @@ class QuotesViewController: UIViewController {
         
         tableView.tableFooterView = footerView
     }
-
+    
     private func bindViewModel() {
         viewModel.quotes
             .bind(to: tableView.rx.items(cellIdentifier: "QuoteTableViewCell", cellType: QuoteTableViewCell.self)) { row, quote, cell in
@@ -90,7 +90,7 @@ class QuotesViewController: UIViewController {
                 cell.authorLabel.text = "- \(quote.author)"
             }
             .disposed(by: disposeBag)
-
+        
         viewModel.error
             .observe(on: MainScheduler.instance)
             .subscribe(onNext: { [weak self] error in
@@ -98,16 +98,16 @@ class QuotesViewController: UIViewController {
                 self?.showNoDataView()
             })
             .disposed(by: disposeBag)
-
+        
         viewModel.loading
             .observe(on: MainScheduler.instance)
             .bind(to: footerActivityIndicator.rx.isAnimating)
             .disposed(by: disposeBag)
     }
-
+    
     private func setupReachability() {
         let reachability = NetworkReachabilityManager()
-
+        
         reachability?.startListening(onQueue: .main, onUpdatePerforming: { [weak self] status in
             guard let self = self else { return }
             switch status {
@@ -124,7 +124,7 @@ class QuotesViewController: UIViewController {
         noDataView.isHidden = false
         tableView.isHidden = true
     }
-
+    
     @objc private func retryFetchingQuotes() {
         if let reachability = NetworkReachabilityManager(), reachability.isReachable {
             noInternetView.isHidden = true
